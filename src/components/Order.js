@@ -5,40 +5,54 @@ import { setOrderDetails } from "../features/uiSlice";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import moment from "moment";
-import "bootstrap/dist/css/bootstrap.min.css";
 import "../index.css";
-
 
 export default function Order() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
   const location = useLocation();
-  const product = location.state?.product;
 
+  const product = location.state?.product;
   const user = useSelector((state) => state.ui.user);
 
-  // ---------------- VALIDATION ----------------
+  /* ======================================
+     ✅ YUP VALIDATION SCHEMA
+  ====================================== */
   const validationSchema = Yup.object({
     phone: Yup.string()
       .required("Phone number is required")
-      .matches(/^[0-9]{8,12}$/, "Enter a valid phone number"),
+      .matches(/^[0-9]{8}$/, "Phone number must be exactly 8 digits"),
 
-    from: Yup.date().required("Start date is required"),
+    from: Yup.date()
+      .required("Start date is required")
+      .min(
+        new Date(new Date().setHours(0, 0, 0, 0)),
+        "Start date cannot be in the past"
+      ),
+
     to: Yup.date()
       .required("End date is required")
       .min(Yup.ref("from"), "End date must be after start date"),
 
-    delivery: Yup.string().required("Delivery area is required"),
-    address: Yup.string().required("Address is required"),
+    quantity: Yup.number()
+      .required("Quantity is required")
+      .min(1, "Minimum quantity is 1")
+      .max(20,"max is 20 items "),
 
-    quantity: Yup.number().min(1).required("Quantity is required"),
+    delivery: Yup.string().required("Delivery area is required").max(50),
+
+    address: Yup.string()
+      .required("Building address is required")
+      .matches(/^[0-9]+$/, "Building address must contain numbers only")
+      .max(15, "Building address cannot exceed 30 digits"),
 
     latitude: Yup.number().required("Please share your location"),
     longitude: Yup.number().required("Please share your location"),
   });
 
-  // ---------------- FORMIK ----------------
+  /* ======================================
+     ✅ FORMIK
+  ====================================== */
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -47,10 +61,10 @@ export default function Order() {
       civilId: "",
       from: moment().format("YYYY-MM-DD"),
       to: moment().format("YYYY-MM-DD"),
+      quantity: 1,
       delivery: "",
       address: "",
       note: "",
-      quantity: 1,
       latitude: "",
       longitude: "",
       orderDate: moment().format("YYYY-MM-DD HH:mm:ss"),
@@ -72,7 +86,9 @@ export default function Order() {
     },
   });
 
-  // ---------------- AUTO FILL USER ----------------
+  /* ======================================
+     ✅ AUTO FILL USER INFO
+  ====================================== */
   useEffect(() => {
     if (user) {
       formik.setFieldValue("name", user.name);
@@ -81,7 +97,9 @@ export default function Order() {
     // eslint-disable-next-line
   }, [user]);
 
-  // ---------------- GET LOCATION ----------------
+  /* ======================================
+     ✅ GET USER LOCATION
+  ====================================== */
   const getUserLocation = () => {
     if (!navigator.geolocation) {
       alert("Location not supported");
@@ -101,14 +119,22 @@ export default function Order() {
     return <p style={{ padding: "20px" }}>⚠ No product selected.</p>;
   }
 
-  // ---------------- UI ----------------
+  /* ======================================
+     ✅ UI
+  ====================================== */
   return (
     <div className="order-page">
-      <div className="order-container" style={{ maxWidth: "520px", margin: "auto" }}>
+      <div
+        className="order-container"
+        style={{ maxWidth: "520px", margin: "auto" }}
+      >
         <h3 style={{ textAlign: "center" }}>Order Details</h3>
 
-        {/* PRODUCT */}
-        <div className="order-product-summary" style={{ display: "flex", gap: "10px" }}>
+        {/* PRODUCT SUMMARY */}
+        <div
+          className="order-product-summary"
+          style={{ display: "flex", gap: "12px", marginBottom: "10px" }}
+        >
           <img
             src={product.image}
             alt={product.category}
@@ -122,26 +148,39 @@ export default function Order() {
           </div>
         </div>
 
+        {/* FORM */}
         <form onSubmit={formik.handleSubmit} className="order-form">
-
           <input value={formik.values.name} readOnly placeholder="Full Name" />
           <input value={formik.values.email} readOnly placeholder="Email" />
 
+          {/* PHONE */}
           <input
             type="tel"
             name="phone"
-            placeholder="Phone Number"
+            placeholder="Phone Number (8 digits)"
+            maxLength={8}
+            inputMode="numeric"
             value={formik.values.phone}
-            onChange={formik.handleChange}
+            onChange={(e) => {
+              if (/^[0-9]*$/.test(e.target.value)) {
+                formik.setFieldValue("phone", e.target.value);
+              }
+            }}
           />
-          {formik.errors.phone && <small className="input-error">{formik.errors.phone}</small>}
+          {formik.errors.phone && (
+            <small className="input-error">{formik.errors.phone}</small>
+          )}
 
+          {/* DATES */}
           <input
             type="date"
             name="from"
             value={formik.values.from}
             onChange={formik.handleChange}
           />
+          {formik.errors.from && (
+            <small className="input-error">{formik.errors.from}</small>
+          )}
 
           <input
             type="date"
@@ -149,16 +188,20 @@ export default function Order() {
             value={formik.values.to}
             onChange={formik.handleChange}
           />
+          {formik.errors.to && (
+            <small className="input-error">{formik.errors.to}</small>
+          )}
 
+          {/* QUANTITY */}
           <input
             type="number"
             name="quantity"
             min="1"
-            placeholder="Quantity"
             value={formik.values.quantity}
             onChange={formik.handleChange}
           />
 
+          {/* DELIVERY */}
           <input
             type="text"
             name="delivery"
@@ -166,14 +209,26 @@ export default function Order() {
             value={formik.values.delivery}
             onChange={formik.handleChange}
           />
+          {formik.errors.delivery && (
+            <small className="input-error">{formik.errors.delivery}</small>
+          )}
 
+          {/* ADDRESS (NUMBERS ONLY) */}
           <input
             type="text"
             name="address"
-            placeholder="Building Address"
+            placeholder="Building Address (numbers only)"
+            maxLength={30}
             value={formik.values.address}
-            onChange={formik.handleChange}
+            onChange={(e) => {
+              if (/^[0-9]*$/.test(e.target.value)) {
+                formik.setFieldValue("address", e.target.value);
+              }
+            }}
           />
+          {formik.errors.address && (
+            <small className="input-error">{formik.errors.address}</small>
+          )}
 
           <textarea
             name="note"
@@ -183,54 +238,36 @@ export default function Order() {
             onChange={formik.handleChange}
           />
 
-          {/* LOCATION UI (SMALL & FRIENDLY) */}
-          <div style={{ marginTop: "10px" }}>
-           <button
-  type="button"
-  onClick={getUserLocation}
-  className="btn-location"
->
-  📍 Share My Location
-</button>
+          {/* LOCATION */}
+          <button
+            type="button"
+            onClick={getUserLocation}
+            className="btn-location"
+          >
+            📍 Share My Location
+          </button>
 
-           
-
-            {formik.values.latitude && (
-              <div
-                style={{
-                  marginTop: "8px",
-                  padding: "8px",
-                  background: "#f6f6f6",
-                  borderRadius: "6px",
-                  textAlign: "center",
-                  fontSize: "13px",
-                }}
-              >
-                <br />
-               
-                <iframe
-                  title="map"
-                  width="100%"
-                  height="150"
-                  style={{ border: 0, marginTop: "6px" }}
-                  loading="lazy"
-                  src={`https://www.google.com/maps?q=${formik.values.latitude},${formik.values.longitude}&z=15&output=embed`}
-                />
-              </div>
-            )}
-          </div>
+          {formik.values.latitude && (
+            <iframe
+              title="map"
+              width="100%"
+              height="150"
+              style={{ border: 0, marginTop: "10px" }}
+              loading="lazy"
+              src={`https://www.google.com/maps?q=${formik.values.latitude},${formik.values.longitude}&z=15&output=embed`}
+            />
+          )}
 
           <button
             type="submit"
             style={{
-              marginTop: "12px",
+              marginTop: "15px",
               width: "100%",
               padding: "10px",
-              color:'#f6f6f6',
-              background:"#4E1C10"
+              background: "#4E1C10",
+              color: "#fff",
+              border: "none",
             }}
-              className="form-control"
-
           >
             Proceed to Payment
           </button>

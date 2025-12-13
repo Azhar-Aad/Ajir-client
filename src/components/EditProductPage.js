@@ -23,7 +23,7 @@ export default function EditProductPage() {
         });
         setCurrentImage(data.image);
       });
-  }, [id,formik]);
+  }, [id]);
 
   // Validation
   const validationSchema = Yup.object({

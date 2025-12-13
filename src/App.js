@@ -18,7 +18,7 @@ import CategoryProductsPage from "./components/CategoryProductsPage";
 import ProductDetailsPage from "./components/ProductDetailsPage";
 import EditProductPage from "./components/EditProductPage";
 import Profile from "./components/Profile";
-import Cart from "./components/Cart";
+import OrdersPage from "./components/OrdersPage";
 // GLOBAL CSS
 import "./index.css";
 
@@ -78,7 +78,8 @@ export default function App() {
                 {/* WISHLIST */}
                 <Route path="/wishlist" element={<WishlistPage />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/cart" element={<Cart />} />
+                <Route path="/orders" element={<OrdersPage />} />
+
 
 
 

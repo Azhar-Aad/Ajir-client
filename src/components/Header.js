@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchText } from "../features/uiSlice";
-import { fetchWishlist } from "../features/wishlistSlice"; // ✅ FIX
-import { User, Heart, ShoppingCart } from "lucide-react";
+import { fetchWishlist } from "../features/wishlistSlice";
+import { User, Heart, Moon, Sun } from "lucide-react";
 import { Container } from "reactstrap";
 import logo from "../images/logo.png";
 
@@ -11,23 +11,39 @@ export default function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // ⭐ Redux States
+  // ---------------- DARK MODE ----------------
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
+  }, [darkMode]);
+
+  // ---------------- REDUX STATE ----------------
   const searchText = useSelector((state) => state.ui.searchText);
   const wishlistCount = useSelector((state) => state.wishlist.items.length);
-  const cartCount = useSelector((state) => state.cart.items.length);
 
-  // ⭐ TEMP USER (guest)
+  // TEMP USER
   const userId = "guest";
 
-  // ⭐ Load Wishlist using Redux Thunk (axios)
+  // ---------------- LOAD WISHLIST ----------------
   useEffect(() => {
     dispatch(fetchWishlist(userId));
   }, [dispatch, userId]);
 
   return (
     <>
-      {/* TOP LINE */}
-      <div style={{ width: "100%", height: "38px", backgroundColor: "#4E1C10" }} />
+      {/* TOP BAR */}
+      <div
+        style={{
+          width: "100%",
+          height: "38px",
+          backgroundColor: "#4E1C10",
+        }}
+      />
 
       {/* HEADER */}
       <header
@@ -65,6 +81,7 @@ export default function Header() {
                   padding: 0,
                   fontSize: "16px",
                   fontWeight: "500",
+                  cursor: "pointer",
                 }}
               >
                 <li onClick={() => navigate("/")}>Home</li>
@@ -85,6 +102,7 @@ export default function Header() {
                 borderRadius: "30px",
                 border: "1px solid #ccc",
                 fontSize: "15px",
+                outline: "none",
               }}
               value={searchText}
               onChange={(e) => dispatch(setSearchText(e.target.value))}
@@ -100,6 +118,15 @@ export default function Header() {
               fontSize: "18px",
             }}
           >
+            {/* DARK MODE TOGGLE */}
+            <div
+              onClick={() => setDarkMode(!darkMode)}
+              style={{ cursor: "pointer" }}
+              title="Toggle Dark Mode"
+            >
+              {darkMode ? <Sun /> : <Moon />}
+            </div>
+
             {/* USER */}
             <User
               style={{ cursor: "pointer" }}
@@ -127,31 +154,6 @@ export default function Header() {
                   }}
                 >
                   {wishlistCount}
-                </span>
-              )}
-            </div>
-
-            {/* CART */}
-            <div
-              style={{ position: "relative", cursor: "pointer" }}
-              onClick={() => navigate("/cart")}
-            >
-              <ShoppingCart />
-              {cartCount > 0 && (
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "-8px",
-                    right: "-8px",
-                    backgroundColor: "#1A5319",
-                    color: "white",
-                    borderRadius: "50%",
-                    padding: "2px 6px",
-                    fontSize: "10px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {cartCount}
                 </span>
               )}
             </div>

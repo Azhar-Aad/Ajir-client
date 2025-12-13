@@ -1,25 +1,36 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../images/logo.png"; // your Ajir logo
+import logo from "../images/logo.png";
+import "../index.css";
 
 export default function OrderSuccess() {
   const navigate = useNavigate();
+  const [showCheck, setShowCheck] = useState(false);
+
+  // ⭐ Trigger animation on load
+  useEffect(() => {
+    setTimeout(() => setShowCheck(true), 300);
+  }, []);
 
   return (
     <div className="success-page">
       <div className="success-container">
-        <img src={logo} alt="Ajir Logo" className="success-logo" />
 
-        <h2 className="success-title">Thank you for choosing Ajir! 🙌</h2>
+
+
+         <img src={logo} alt="Ajir Logo" className="success-logo" />
+
+        {/* ✅ Animated Check */}
+        <div className={`check-wrapper ${showCheck ? "show" : ""}`}>
+         <div className="check-circle">✓</div>
+
+        </div>
+
+       
+
+        <h2 className="success-title">Order Confirmed!</h2>
         <p className="success-message">
-          Your order has been received successfully.
-        </p>
-        <p className="success-subtext">
-          We’re delighted to have you join our platform, which provides a special
-          space for every business owner or brand to showcase or rent their
-          products.  
-          <br />
-          Please check your email to follow up on your order status.
+          Your order has been placed successfully 🎉
         </p>
 
         <button className="btn-return" onClick={() => navigate("/")}>

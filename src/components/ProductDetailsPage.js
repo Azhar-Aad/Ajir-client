@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toggleWishlist } from "../features/wishlistSlice"; // ✅ FIX
-import { addToCart } from "../features/cartSlice";
+
 import { Heart } from "lucide-react";
 
 const BASE_URL = "https://ajir-server.onrender.com";
@@ -47,11 +47,6 @@ export default function ProductDetailsPage() {
     dispatch(toggleWishlist({ userId, productId: id }));
   };
 
-  // ---------------- ADD TO CART ----------------
-  const handleAddCart = () => {
-    dispatch(addToCart(product));
-    alert("Added to Cart!");
-  };
 
   if (!product) return <p className="text-center mt-5">Loading...</p>;
 
@@ -131,15 +126,6 @@ export default function ProductDetailsPage() {
               />
             </div>
 
-            {/* CART */}
-            {!isInCart && (
-              <button
-                onClick={handleAddCart}
-                className="btn btn-outline-dark"
-              >
-                Add to Cart
-              </button>
-            )}
           </div>
         </div>
       </div>

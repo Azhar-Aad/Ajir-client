@@ -1,14 +1,15 @@
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   removeFromCart,
   changeQuantity,
   clearCart,
 } from "../features/cartSlice";
-import { Container } from "reactstrap";
+import { useNavigate } from "react-router-dom";
 
-export default function Cart() {
+export default function CartPage() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const cartItems = useSelector((state) => state.cart.items);
 
   const totalItems = cartItems.reduce(
@@ -16,101 +17,120 @@ export default function Cart() {
     0
   );
 
+  const totalPrice = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  if (cartItems.length === 0) {
+    return (
+      <div className="container mt-5">
+        <h3>Your cart is empty 🛒</h3>
+      </div>
+    );
+  }
+
   return (
-    <Container style={{ padding: "40px" }}>
-      <h2>🛒 My Cart</h2>
+    <div className="container mt-5">
+      <h2>My Cart</h2>
 
-      {cartItems.length === 0 ? (
-        <p>Your cart is empty.</p>
-      ) : (
-        <>
-          {cartItems.map((item) => (
-            <div
-              key={item._id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                borderBottom: "1px solid #ddd",
-                padding: "15px 0",
-              }}
+      {cartItems.map((item) => (
+        <div
+          key={item._id}
+          className="d-flex align-items-center justify-content-between border-bottom py-3"
+        >
+          {/* IMAGE */}
+          <img
+            src={item.image}
+            alt={item.category}
+            style={{
+              width: "90px",
+              height: "90px",
+              objectFit: "cover",
+              borderRadius: "8px",
+            }}
+          />
+
+          {/* DETAILS */}
+          <div style={{ flex: 1, marginLeft: "20px" }}>
+            <h5>{item.category}</h5>
+            <p className="text-muted">{item.rentalPlace}</p>
+            <p>
+              <strong>{item.price} OMR / day</strong>
+            </p>
+          </div>
+
+          {/* QUANTITY */}
+          <div className="d-flex align-items-center gap-2">
+            <button
+              className="btn btn-outline-dark"
+              onClick={() =>
+                dispatch(
+                  changeQuantity({
+                    id: item._id,
+                    quantity: item.quantity - 1,
+                  })
+                )
+              }
+              disabled={item.quantity <= 1}
             >
-              {/* PRODUCT INFO */}
-              <div>
-                <h5>{item.name}</h5>
-                <p>Quantity: {item.quantity}</p>
-              </div>
+              -
+            </button>
 
-              {/* QUANTITY CONTROLS */}
-              <div>
-                <button
-                  onClick={() =>
-                    dispatch(
-                      changeQuantity({
-                        id: item._id,
-                        quantity: item.quantity - 1,
-                      })
-                    )
-                  }
-                  disabled={item.quantity === 1}
-                >
-                  −
-                </button>
-
-                <span style={{ margin: "0 10px" }}>
-                  {item.quantity}
-                </span>
-
-                <button
-                  onClick={() =>
-                    dispatch(
-                      changeQuantity({
-                        id: item._id,
-                        quantity: item.quantity + 1,
-                      })
-                    )
-                  }
-                >
-                  +
-                </button>
-              </div>
-
-              {/* REMOVE */}
-              <button
-                style={{
-                  backgroundColor: "#8C1C13",
-                  color: "white",
-                  border: "none",
-                  padding: "6px 12px",
-                  cursor: "pointer",
-                }}
-                onClick={() => dispatch(removeFromCart(item._id))}
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-
-          {/* CART SUMMARY */}
-          <div style={{ marginTop: "30px" }}>
-            <h4>Total items: {totalItems}</h4>
+            <strong>{item.quantity}</strong>
 
             <button
-              style={{
-                marginTop: "15px",
-                padding: "10px 20px",
-                backgroundColor: "#4E1C10",
-                color: "white",
-                border: "none",
-                cursor: "pointer",
-              }}
-              onClick={() => dispatch(clearCart())}
+              className="btn btn-outline-dark"
+              onClick={() =>
+                dispatch(
+                  changeQuantity({
+                    id: item._id,
+                    quantity: item.quantity + 1,
+                  })
+                )
+              }
             >
-              Clear Cart
+              +
             </button>
           </div>
-        </>
-      )}
-    </Container>
+
+          {/* ITEM TOTAL */}
+          <div style={{ width: "120px", textAlign: "center" }}>
+            <strong>{item.price * item.quantity} OMR</strong>
+          </div>
+
+          {/* REMOVE */}
+          <button
+            className="btn btn-danger"
+            onClick={() => dispatch(removeFromCart(item._id))}
+          >
+            Remove
+          </button>
+        </div>
+      ))}
+
+      {/* SUMMARY */}
+      <div className="mt-4">
+        <h5>Total items: {totalItems}</h5>
+        <h4>Total price: {totalPrice} OMR</h4>
+      </div>
+
+      {/* ACTIONS */}
+      <div className="mt-3 d-flex gap-3">
+        <button
+          className="btn btn-secondary"
+          onClick={() => dispatch(clearCart())}
+        >
+          Clear Cart
+        </button>
+
+        <button
+          className="btn btn-dark"
+          onClick={() => navigate("/order")}
+        >
+          Proceed to Order
+        </button>
+      </div>
+    </div>
   );
 }
