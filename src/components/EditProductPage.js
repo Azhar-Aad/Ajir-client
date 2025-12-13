@@ -9,7 +9,7 @@ export default function EditProductPage() {
   const [currentImage, setCurrentImage] = useState("");
   const [newImage, setNewImage] = useState(null);
 
-  // Load existing product
+  // Load existing product 
   useEffect(() => {
     fetch("http://localhost:5000/products/" + id)
       .then((res) => res.json())

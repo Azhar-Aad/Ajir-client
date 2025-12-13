@@ -1,17 +1,44 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
-// Load saved data
+// 🌍 Render backend URL
+const BASE_URL = "https://ajir-server.onrender.com";
+
+// -------------------------
+// LOAD FROM LOCAL STORAGE
+// -------------------------
 const storedCart = localStorage.getItem("cartItems");
 const storedOrders = localStorage.getItem("orders");
 
+// -------------------------
+// ASYNC THUNK: PLACE ORDER
+// -------------------------
+export const placeOrderToServer = createAsyncThunk(
+  "cart/placeOrderToServer",
+  async (orderData, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(`${BASE_URL}/order`, orderData);
+      return res.data; // { orderId, message }
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Order failed"
+      );
+    }
+  }
+);
+
+// -------------------------
+// SLICE
+// -------------------------
 const cartSlice = createSlice({
   name: "cart",
 
   initialState: {
     items: storedCart ? JSON.parse(storedCart) : [],
-
-    // ⭐ Order history
     orders: storedOrders ? JSON.parse(storedOrders) : [],
+
+    loading: false,
+    error: null,
   },
 
   reducers: {
@@ -60,28 +87,6 @@ const cartSlice = createSlice({
     },
 
     // -------------------------
-    // PLACE ORDER ⭐⭐⭐
-    // -------------------------
-    placeOrder(state, action) {
-      const orderDetails = {
-        id: Date.now(), // order id
-        items: state.items,
-        totalPrice: action.payload.totalPrice,
-        customer: action.payload.customer,
-        date: new Date().toISOString(),
-        status: "Confirmed",
-      };
-
-      // Save order
-      state.orders.push(orderDetails);
-      localStorage.setItem("orders", JSON.stringify(state.orders));
-
-      // Clear cart
-      state.items = [];
-      localStorage.removeItem("cartItems");
-    },
-
-    // -------------------------
     // CLEAR CART
     // -------------------------
     clearCart(state) {
@@ -89,14 +94,52 @@ const cartSlice = createSlice({
       localStorage.removeItem("cartItems");
     },
   },
+
+  // -------------------------
+  // EXTRA REDUCERS (ORDER)
+  // -------------------------
+  extraReducers: (builder) => {
+    builder
+      // PLACE ORDER
+      .addCase(placeOrderToServer.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(placeOrderToServer.fulfilled, (state, action) => {
+        state.loading = false;
+
+        const orderDetails = {
+          id: action.payload.orderId,
+          items: state.items,
+          date: new Date().toISOString(),
+          status: "Confirmed",
+        };
+
+        state.orders.push(orderDetails);
+        localStorage.setItem("orders", JSON.stringify(state.orders));
+
+        // Clear cart after success
+        state.items = [];
+        localStorage.removeItem("cartItems");
+      })
+      .addCase(placeOrderToServer.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+  },
 });
 
+// -------------------------
+// EXPORT ACTIONS
+// -------------------------
 export const {
   addToCart,
   removeFromCart,
   changeQuantity,
-  placeOrder,
   clearCart,
 } = cartSlice.actions;
 
+// -------------------------
+// EXPORT REDUCER
+// -------------------------
 export default cartSlice.reducer;

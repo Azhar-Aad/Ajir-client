@@ -4,54 +4,62 @@ import { useSelector, useDispatch } from "react-redux";
 import { setOrderDetails } from "../features/uiSlice";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import moment from "moment";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "../index.css";
+
 
 export default function Order() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // ⭐ Get product from navigation state
   const location = useLocation();
   const product = location.state?.product;
 
   const user = useSelector((state) => state.ui.user);
 
-  // ⭐ Validation Schema
+  // ---------------- VALIDATION ----------------
   const validationSchema = Yup.object({
     phone: Yup.string()
       .required("Phone number is required")
       .matches(/^[0-9]{8,12}$/, "Enter a valid phone number"),
-    civilId: Yup.string().nullable(),
+
     from: Yup.date().required("Start date is required"),
     to: Yup.date()
       .required("End date is required")
       .min(Yup.ref("from"), "End date must be after start date"),
-    delivery: Yup.string().required("Delivery location is required"),
+
+    delivery: Yup.string().required("Delivery area is required"),
     address: Yup.string().required("Address is required"),
-    quantity: Yup.number()
-      .required("Quantity is required")
-      .min(1, "Minimum quantity is 1"),
+
+    quantity: Yup.number().min(1).required("Quantity is required"),
+
+    latitude: Yup.number().required("Please share your location"),
+    longitude: Yup.number().required("Please share your location"),
   });
 
-  // ⭐ Formik BEFORE any conditional returns
+  // ---------------- FORMIK ----------------
   const formik = useFormik({
     initialValues: {
       name: "",
       email: "",
       phone: "",
       civilId: "",
-      from: new Date().toISOString().split("T")[0],
-      to: new Date().toISOString().split("T")[0],
+      from: moment().format("YYYY-MM-DD"),
+      to: moment().format("YYYY-MM-DD"),
       delivery: "",
       address: "",
       note: "",
       quantity: 1,
+      latitude: "",
+      longitude: "",
+      orderDate: moment().format("YYYY-MM-DD HH:mm:ss"),
     },
+
     validationSchema,
+
     onSubmit: (values) => {
-      if (!product) {
-        alert("Error: No product selected!");
-        return;
-      }
+      if (!product) return;
 
       const orderData = {
         ...values,
@@ -64,7 +72,7 @@ export default function Order() {
     },
   });
 
-  // ⭐ Auto-fill name & email (hook BEFORE conditional return)
+  // ---------------- AUTO FILL USER ----------------
   useEffect(() => {
     if (user) {
       formik.setFieldValue("name", user.name);
@@ -73,60 +81,61 @@ export default function Order() {
     // eslint-disable-next-line
   }, [user]);
 
-  // ⭐ Now we can safely conditionally return
-  if (!product) {
-    return (
-      <div className="order-page">
-        <p className="no-product">⚠ No product selected.</p>
-      </div>
+  // ---------------- GET LOCATION ----------------
+  const getUserLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Location not supported");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        formik.setFieldValue("latitude", pos.coords.latitude);
+        formik.setFieldValue("longitude", pos.coords.longitude);
+      },
+      () => alert("Unable to get your location")
     );
+  };
+
+  if (!product) {
+    return <p style={{ padding: "20px" }}>⚠ No product selected.</p>;
   }
 
+  // ---------------- UI ----------------
   return (
     <div className="order-page">
-      <div className="order-container">
-        <h2 className="order-title">Order</h2>
+      <div className="order-container" style={{ maxWidth: "520px", margin: "auto" }}>
+        <h3 style={{ textAlign: "center" }}>Order Details</h3>
 
-        <div className="order-product-summary">
+        {/* PRODUCT */}
+        <div className="order-product-summary" style={{ display: "flex", gap: "10px" }}>
           <img
             src={product.image}
             alt={product.category}
-            className="order-product-image"
+            style={{ width: "80px", height: "60px", objectFit: "cover" }}
           />
           <div>
-            <h4>{product.category}</h4>
-            <p>Price/day: {product.price} OMR</p>
+            <strong>{product.category}</strong>
+            <p style={{ margin: 0, fontSize: "14px" }}>
+              {product.price} OMR / day
+            </p>
           </div>
         </div>
 
         <form onSubmit={formik.handleSubmit} className="order-form">
 
-          <label>Full Name</label>
-          <input type="text" value={formik.values.name} readOnly />
+          <input value={formik.values.name} readOnly placeholder="Full Name" />
+          <input value={formik.values.email} readOnly placeholder="Email" />
 
-          <label>Email</label>
-          <input type="email" value={formik.values.email} readOnly />
-
-          <label>Phone Number</label>
           <input
             type="tel"
             name="phone"
+            placeholder="Phone Number"
             value={formik.values.phone}
             onChange={formik.handleChange}
           />
-          {formik.touched.phone && formik.errors.phone && (
-            <p className="input-error">{formik.errors.phone}</p>
-          )}
+          {formik.errors.phone && <small className="input-error">{formik.errors.phone}</small>}
 
-          <label>Civil ID</label>
-          <input
-            type="text"
-            name="civilId"
-            value={formik.values.civilId}
-            onChange={formik.handleChange}
-          />
-
-          <label>Rental From</label>
           <input
             type="date"
             name="from"
@@ -134,7 +143,6 @@ export default function Order() {
             onChange={formik.handleChange}
           />
 
-          <label>To</label>
           <input
             type="date"
             name="to"
@@ -142,40 +150,88 @@ export default function Order() {
             onChange={formik.handleChange}
           />
 
-          <label>Quantity</label>
           <input
             type="number"
             name="quantity"
             min="1"
+            placeholder="Quantity"
             value={formik.values.quantity}
             onChange={formik.handleChange}
           />
 
-          <label>Delivery Location</label>
           <input
             type="text"
             name="delivery"
+            placeholder="Delivery Area"
             value={formik.values.delivery}
             onChange={formik.handleChange}
           />
 
-          <label>Building Address</label>
           <input
             type="text"
             name="address"
+            placeholder="Building Address"
             value={formik.values.address}
             onChange={formik.handleChange}
           />
 
-          <label>Note</label>
           <textarea
             name="note"
             rows="2"
+            placeholder="Note (optional)"
             value={formik.values.note}
             onChange={formik.handleChange}
-          ></textarea>
+          />
 
-          <button type="submit" className="btn-proceed">
+          {/* LOCATION UI (SMALL & FRIENDLY) */}
+          <div style={{ marginTop: "10px" }}>
+           <button
+  type="button"
+  onClick={getUserLocation}
+  className="btn-location"
+>
+  📍 Share My Location
+</button>
+
+           
+
+            {formik.values.latitude && (
+              <div
+                style={{
+                  marginTop: "8px",
+                  padding: "8px",
+                  background: "#f6f6f6",
+                  borderRadius: "6px",
+                  textAlign: "center",
+                  fontSize: "13px",
+                }}
+              >
+                <br />
+               
+                <iframe
+                  title="map"
+                  width="100%"
+                  height="150"
+                  style={{ border: 0, marginTop: "6px" }}
+                  loading="lazy"
+                  src={`https://www.google.com/maps?q=${formik.values.latitude},${formik.values.longitude}&z=15&output=embed`}
+                />
+              </div>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            style={{
+              marginTop: "12px",
+              width: "100%",
+              padding: "10px",
+              color:'#f6f6f6',
+              background:"#4E1C10"
+            }}
+              className="form-control"
+
+          >
             Proceed to Payment
           </button>
         </form>
