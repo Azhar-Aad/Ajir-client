@@ -35,7 +35,7 @@ export default function Payment() {
     e.preventDefault();
 
     // 1️⃣ Save order to backend
-    const orderRes = await fetch("http://localhost:5000/order", {
+    const orderRes = await fetch("https://ajir-server.onrender.com/order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(order),
@@ -51,7 +51,7 @@ export default function Payment() {
     const createdOrderId = orderData.orderId;
 
     // 2️⃣ Save payment to backend
-    const payRes = await fetch("http://localhost:5000/payment/complete", {
+    const payRes = await fetch("https://ajir-server.onrender.com/payment/complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

@@ -11,7 +11,7 @@ export default function EditProductPage() {
 
   // Load existing product 
   useEffect(() => {
-    fetch("http://localhost:5000/products/" + id)
+    fetch("https://ajir-server.onrender.com/products/" + id)
       .then((res) => res.json())
       .then((data) => {
         formik.setValues({
@@ -23,7 +23,7 @@ export default function EditProductPage() {
         });
         setCurrentImage(data.image);
       });
-  }, [id]);
+  }, [id,formik]);
 
   // Validation
   const validationSchema = Yup.object({
@@ -62,7 +62,7 @@ export default function EditProductPage() {
 
   // Submit update request
   const submitUpdate = async (values, img) => {
-    const res = await fetch("http://localhost:5000/admin/update-product/" + id, {
+    const res = await fetch("https://ajir-server.onrender.com/admin/update-product/" + id, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...values, image: img }),

@@ -18,7 +18,7 @@ export default function AddProductPage() {
 
   // Load products
   useEffect(() => {
-    fetch("http://localhost:5000/products")
+fetch("https://ajir-server.onrender.com/products")
       .then((res) => res.json())
       .then((data) => setProducts(data));
   }, []);
@@ -27,7 +27,7 @@ export default function AddProductPage() {
   const deleteProduct = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
 
-    const res = await fetch(`http://localhost:5000/admin/delete-product/${id}`, {
+    const res = await fetch(`https://ajir-server.onrender.com/admin/delete-product/${id}`, {
       method: "DELETE",
     });
 
@@ -75,7 +75,7 @@ export default function AddProductPage() {
       reader.onloadend = async () => {
         const base64Image = reader.result;
 
-        const res = await fetch("http://localhost:5000/admin/add-product", {
+        const res = await fetch("https://ajir-server.onrender.com/admin/add-product", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...values, image: base64Image }),

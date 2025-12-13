@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
-import { setWishlist } from "../features/wishlistSlice";
+import axios from "axios";
+import { toggleWishlist } from "../features/wishlistSlice"; // ✅ FIX
 import { addToCart } from "../features/cartSlice";
-import { Heart } from "lucide-react";   // ⭐ ICON IMPORT
+import { Heart } from "lucide-react";
+
+const BASE_URL = "https://ajir-server.onrender.com";
 
 export default function ProductDetailsPage() {
   const { id } = useParams();
@@ -14,15 +17,16 @@ export default function ProductDetailsPage() {
   const cartItems = useSelector((state) => state.cart.items);
 
   const [product, setProduct] = useState(null);
+
+  // TEMP USER
   const userId = "guest";
 
-  // ⭐ Load product details
+  // ---------------- LOAD PRODUCT ----------------
   useEffect(() => {
     async function loadProduct() {
       try {
-        const res = await fetch(`http://localhost:5000/products/${id}`);
-        const data = await res.json();
-        setProduct(data);
+        const res = await axios.get(`${BASE_URL}/products/${id}`);
+        setProduct(res.data);
       } catch (err) {
         console.error("Load error:", err);
       }
@@ -33,40 +37,28 @@ export default function ProductDetailsPage() {
   const isInWishlist = wishlist.some((p) => p._id === id);
   const isInCart = cartItems.some((p) => p._id === id);
 
-  // ⭐ Navigate to order page
+  // ---------------- ORDER ----------------
   const handleOrder = () => {
     navigate("/order", { state: { product } });
   };
 
-  // ⭐ Toggle wishlist
-  const toggleWishlist = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/wishlist/toggle", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, productId: id }),
-      });
-
-      const updated = await res.json();
-      dispatch(setWishlist(updated));
-    } catch (err) {
-      console.error("Wishlist Error:", err);
-    }
+  // ---------------- TOGGLE WISHLIST ----------------
+  const handleToggleWishlist = () => {
+    dispatch(toggleWishlist({ userId, productId: id }));
   };
 
-  // ⭐ Add to cart
+  // ---------------- ADD TO CART ----------------
   const handleAddCart = () => {
     dispatch(addToCart(product));
     alert("Added to Cart!");
   };
 
-  if (!product) return <p>Loading...</p>;
+  if (!product) return <p className="text-center mt-5">Loading...</p>;
 
   return (
     <div className="container mt-5">
       <div className="row">
-
-        {/* LEFT SIDE IMAGE */}
+        {/* IMAGE */}
         <div className="col-md-5 text-center">
           <img
             src={product.image}
@@ -81,7 +73,7 @@ export default function ProductDetailsPage() {
           />
         </div>
 
-        {/* RIGHT SIDE DETAILS */}
+        {/* DETAILS */}
         <div className="col-md-7">
           <h3
             style={{
@@ -96,31 +88,22 @@ export default function ProductDetailsPage() {
 
           <div style={{ lineHeight: "1.9", fontSize: "16px" }}>
             <p><strong>Rental place:</strong> {product.rentalPlace}</p>
-            <p><strong>Product status:</strong> Available</p>
+            <p><strong>Status:</strong> Available</p>
             <p><strong>Price/day:</strong> {product.price} OMR</p>
           </div>
 
           {/* DESCRIPTION */}
           <div style={{ marginTop: "20px" }}>
             <strong style={{ fontSize: "17px" }}>Product description:</strong>
-
-            <ul
-              style={{
-                marginTop: "8px",
-                paddingLeft: "18px",
-                lineHeight: "1.7",
-              }}
-            >
+            <ul style={{ marginTop: "8px", paddingLeft: "18px" }}>
               {product.description.split("\n").map((line, index) => (
                 <li key={index}>{line}</li>
               ))}
             </ul>
           </div>
 
-          {/* BUTTONS */}
-          <div className="mt-4 d-flex flex-wrap gap-4">
-
-            {/* ⭐ ORDER BUTTON */}
+          {/* ACTIONS */}
+          <div className="mt-4 d-flex align-items-center gap-4">
             <button
               onClick={handleOrder}
               className="btn px-4 py-2"
@@ -135,28 +118,28 @@ export default function ProductDetailsPage() {
               Order
             </button>
 
-           {/* ⭐ WISHLIST ICON BUTTON (NO CIRCLE) */}
-<div
-  onClick={toggleWishlist}
-  style={{
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    transition: "0.2s ease",
-  }}
->
-  <Heart
-    size={32}
-    color={isInWishlist ? "red" : "#B92B27"}
-    fill={isInWishlist ? "red" : "none"}
-    strokeWidth={2.2}
-    style={{ transition: "0.2s ease" }}
-  />
-</div>
+            {/* WISHLIST */}
+            <div
+              onClick={handleToggleWishlist}
+              style={{ cursor: "pointer" }}
+            >
+              <Heart
+                size={32}
+                color={isInWishlist ? "red" : "#B92B27"}
+                fill={isInWishlist ? "red" : "none"}
+                strokeWidth={2.2}
+              />
+            </div>
 
-            
-
+            {/* CART */}
+            {!isInCart && (
+              <button
+                onClick={handleAddCart}
+                className="btn btn-outline-dark"
+              >
+                Add to Cart
+              </button>
+            )}
           </div>
         </div>
       </div>

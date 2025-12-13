@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchText } from "../features/uiSlice";
-import { setWishlist } from "../features/wishlistSlice";
+import { fetchWishlist } from "../features/wishlistSlice"; // ✅ FIX
 import { User, Heart, ShoppingCart } from "lucide-react";
 import { Container } from "reactstrap";
 import logo from "../images/logo.png";
@@ -14,36 +14,22 @@ export default function Header() {
   // ⭐ Redux States
   const searchText = useSelector((state) => state.ui.searchText);
   const wishlistCount = useSelector((state) => state.wishlist.items.length);
-  const cartCount = useSelector((state) => state.cart.items.length); // ⭐ ADDED
+  const cartCount = useSelector((state) => state.cart.items.length);
 
+  // ⭐ TEMP USER (guest)
   const userId = "guest";
 
-  // ⭐ Load Wishlist on Header Mount
+  // ⭐ Load Wishlist using Redux Thunk (axios)
   useEffect(() => {
-    async function fetchWishlist() {
-      try {
-        const res = await fetch(`http://localhost:5000/wishlist/${userId}`);
-        const data = await res.json();
-        dispatch(setWishlist(data));
-      } catch (err) {
-        console.error("Wishlist load error:", err);
-      }
-    }
-    fetchWishlist();
-  }, [dispatch]);
+    dispatch(fetchWishlist(userId));
+  }, [dispatch, userId]);
 
   return (
     <>
-      {/* ⭐ TOP BROWN LINE */}
-      <div
-        style={{
-          width: "100%",
-          height: "38px",
-          backgroundColor: "#4E1C10",
-        }}
-      ></div>
+      {/* TOP LINE */}
+      <div style={{ width: "100%", height: "38px", backgroundColor: "#4E1C10" }} />
 
-      {/* MAIN HEADER */}
+      {/* HEADER */}
       <header
         style={{
           backgroundColor: "#ffffff",
@@ -59,7 +45,7 @@ export default function Header() {
             justifyContent: "space-between",
           }}
         >
-          {/* LEFT SIDE */}
+          {/* LEFT */}
           <div style={{ display: "flex", alignItems: "center", gap: "25px" }}>
             <Link to="/">
               <img
@@ -79,7 +65,6 @@ export default function Header() {
                   padding: 0,
                   fontSize: "16px",
                   fontWeight: "500",
-                  cursor: "pointer",
                 }}
               >
                 <li onClick={() => navigate("/")}>Home</li>
@@ -89,7 +74,7 @@ export default function Header() {
             </nav>
           </div>
 
-          {/* SEARCH BAR */}
+          {/* SEARCH */}
           <div style={{ flexGrow: 1, maxWidth: "450px", marginLeft: "40px" }}>
             <input
               type="text"
@@ -99,7 +84,6 @@ export default function Header() {
                 padding: "10px 15px",
                 borderRadius: "30px",
                 border: "1px solid #ccc",
-                outline: "none",
                 fontSize: "15px",
               }}
               value={searchText}
@@ -128,7 +112,6 @@ export default function Header() {
               onClick={() => navigate("/wishlist")}
             >
               <Heart />
-
               {wishlistCount > 0 && (
                 <span
                   style={{
@@ -148,13 +131,12 @@ export default function Header() {
               )}
             </div>
 
-            {/* ⭐ CART WITH BADGE ⭐ */}
+            {/* CART */}
             <div
               style={{ position: "relative", cursor: "pointer" }}
               onClick={() => navigate("/cart")}
             >
               <ShoppingCart />
-
               {cartCount > 0 && (
                 <span
                   style={{
@@ -179,4 +161,3 @@ export default function Header() {
     </>
   );
 }
-

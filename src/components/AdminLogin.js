@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import bgImage from "../images/pattern.png";
+
+// 🌍 Render backend
+const BASE_URL = "https://ajir-server.onrender.com";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -17,21 +21,18 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/admin-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+      const res = await axios.post(`${BASE_URL}/admin-login`, {
+        username,
+        password,
       });
 
-      const data = await res.json();
-
-      if (res.ok) {
+      if (res.status === 200) {
         navigate("/admin/add-product");
-      } else {
-        alert(data.message);
       }
     } catch (err) {
-      alert("Server error. Try again.");
+      alert(
+        err.response?.data?.message || "Server error. Try again."
+      );
     }
 
     setLoading(false);
@@ -41,12 +42,16 @@ export default function AdminLogin() {
     <div className="login-container">
       {/* LEFT SIDE */}
       <div className="login-left">
-
         <div className="login-content">
           <h2 className="login-title">Admin Login</h2>
-          <p className="login-subtitle">Only authorized users can access the admin panel</p>
+          <p className="login-subtitle">
+            Only authorized users can access the admin panel
+          </p>
 
-          <form className="login-form" onSubmit={(e) => e.preventDefault()}>
+          <form
+            className="login-form"
+            onSubmit={(e) => e.preventDefault()}
+          >
             {/* Username */}
             <label>Username</label>
             <input
@@ -66,7 +71,11 @@ export default function AdminLogin() {
             />
 
             {/* Login Button */}
-            <button type="button" onClick={handleLogin} disabled={loading}>
+            <button
+              type="button"
+              onClick={handleLogin}
+              disabled={loading}
+            >
               {loading ? "Logging in..." : "Login"}
             </button>
           </form>

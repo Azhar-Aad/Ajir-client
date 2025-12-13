@@ -1,8 +1,8 @@
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { useDispatch } from "react-redux";
-import { setUser } from "../features/uiSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "../features/uiSlice"; // ✅ FIX
 
 import logo from "../images/logo.png";
 import bgImage from "../images/pattern.png";
@@ -10,6 +10,8 @@ import "../index.css";
 
 export default function Login({ onLoginSuccess, onSwitchToSignup }) {
   const dispatch = useDispatch();
+
+  const { loading, error } = useSelector((state) => state.ui);
 
   const formik = useFormik({
     initialValues: {
@@ -27,30 +29,10 @@ export default function Login({ onLoginSuccess, onSwitchToSignup }) {
     }),
 
     onSubmit: async (values) => {
-      try {
-        const res = await fetch("http://localhost:5000/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(values),
-        });
+      const result = await dispatch(loginUser(values));
 
-        const data = await res.json();
-
-        if (res.ok) {
-          dispatch(
-            setUser({
-              id: data.user.id,
-              name: data.user.name,
-              email: data.user.email,
-            })
-          );
-
-          onLoginSuccess();
-        } else {
-          alert(data.message);
-        }
-      } catch (err) {
-        alert("Network error. Please try again.");
+      if (loginUser.fulfilled.match(result)) {
+        onLoginSuccess();
       }
     },
   });
@@ -98,12 +80,15 @@ export default function Login({ onLoginSuccess, onSwitchToSignup }) {
               <p className="input-error">{formik.errors.password}</p>
             )}
 
+            {/* SERVER ERROR */}
+            {error && <p className="input-error">{error}</p>}
+
             <button
               type="submit"
               data-testid="login-button"
-              disabled={formik.isSubmitting}
+              disabled={loading}
             >
-              {formik.isSubmitting ? "Logging in..." : "Login"}
+              {loading ? "Logging in..." : "Login"}
             </button>
 
             <div className="login-divider">or</div>
@@ -130,7 +115,7 @@ export default function Login({ onLoginSuccess, onSwitchToSignup }) {
   );
 }
 
-// Default props for safety
+// Default props
 Login.defaultProps = {
   onLoginSuccess: () => {},
   onSwitchToSignup: () => {},
