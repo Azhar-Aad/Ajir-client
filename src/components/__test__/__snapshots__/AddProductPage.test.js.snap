@@ -1,0 +1,123 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddProductPage Tests matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    style="display: flex; gap: 30px; padding: 40px; justify-content: center; align-items: flex-start;"
+  >
+    <div
+      class="add-product-card"
+      style="width: 350px; background: rgb(255, 255, 255); padding: 25px; border-radius: 12px; box-shadow: 0px 4px 12px rgba(0,0,0,0.1);"
+    >
+      <h2>
+        Add Product
+      </h2>
+      <form>
+        <label
+          for="category"
+        >
+          Category
+        </label>
+        <select
+          id="category"
+          name="category"
+        >
+          <option
+            value=""
+          >
+            Select category
+          </option>
+          <option
+            value="Furniture"
+          >
+            Furniture
+          </option>
+          <option
+            value="Fashion"
+          >
+            Fashion
+          </option>
+          <option
+            value="Event Equipment"
+          >
+            Event Equipment
+          </option>
+          <option
+            value="Cleaning Equipment"
+          >
+            Cleaning Equipment
+          </option>
+          <option
+            value="Electronics"
+          >
+            Electronics
+          </option>
+        </select>
+        <label
+          for="rentalPlace"
+        >
+          Rental place
+        </label>
+        <input
+          id="rentalPlace"
+          name="rentalPlace"
+          value=""
+        />
+        <label
+          for="description"
+        >
+          Description
+        </label>
+        <textarea
+          id="description"
+          name="description"
+        />
+        <label
+          for="quantity"
+        >
+          Quantity
+        </label>
+        <input
+          id="quantity"
+          name="quantity"
+          type="number"
+          value=""
+        />
+        <label
+          for="price"
+        >
+          Price/day
+        </label>
+        <input
+          id="price"
+          name="price"
+          type="number"
+          value=""
+        />
+        <label
+          for="imageUpload"
+        >
+          Upload Image
+        </label>
+        <input
+          id="imageUpload"
+          type="file"
+        />
+        <button
+          style="margin-top: 15px;"
+          type="submit"
+        >
+          Add Product
+        </button>
+      </form>
+    </div>
+    <div
+      style="width: 480px;"
+    >
+      <h2>
+        Added Products
+      </h2>
+    </div>
+  </div>
+</DocumentFragment>
+`;
