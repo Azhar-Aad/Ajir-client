@@ -6,23 +6,28 @@ import axios from "axios";
   - Search text
   - Selected category & product
   - Order details
-  - Logged-in user (profile info)
+  - Logged-in user
 */
 
-// 🌍 BACKEND URL (RENDER)
-const BASE_URL = "https://ajir-server.onrender.com";
+// 🌍 BACKEND URL
+const BASE_URL = "https://ajir-server-v972.onrender.com";
 
-// -----------------------
-// ASYNC THUNKS (AXIOS)
-// -----------------------
+/* =====================================================
+   ASYNC THUNKS
+===================================================== */
 
-// LOGIN
+// 🔐 LOGIN
 export const loginUser = createAsyncThunk(
   "ui/loginUser",
   async (loginData, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${BASE_URL}/login`, loginData);
-      return res.data.user; // { id, name, email }
+      const res = await axios.post(`${BASE_URL}/login`, {
+        email: loginData.email.trim().toLowerCase(), // ✅ FIX
+        password: loginData.password,
+      });
+
+      // Expected: { id, name, email }
+      return res.data.user;
     } catch (err) {
       return rejectWithValue(
         err.response?.data?.message || "Login failed"
@@ -31,12 +36,17 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// SIGNUP
+// 📝 SIGNUP
 export const signupUser = createAsyncThunk(
   "ui/signupUser",
   async (signupData, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${BASE_URL}/signup`, signupData);
+      const res = await axios.post(`${BASE_URL}/signup`, {
+        name: signupData.name.trim(),
+        email: signupData.email.trim().toLowerCase(), // ✅ FIX
+        password: signupData.password,
+      });
+
       return res.data;
     } catch (err) {
       return rejectWithValue(
@@ -46,36 +56,41 @@ export const signupUser = createAsyncThunk(
   }
 );
 
-// -----------------------
-// INITIAL STATE
-// -----------------------
+/* =====================================================
+   INITIAL STATE
+===================================================== */
+
 const initialState = {
+  // UI
   searchText: "",
-  selectedProduct: null,
   selectedCategory: null,
+  selectedProduct: null,
+
+  // ORDER (used by Payment page)
   orderDetails: null,
 
-  // Logged-in user
+  // AUTH
   user: null,
 
   loading: false,
   error: null,
 };
 
-// -----------------------
-// SLICE
-// -----------------------
+/* =====================================================
+   SLICE
+===================================================== */
+
 const uiSlice = createSlice({
   name: "ui",
   initialState,
 
   reducers: {
-    // SEARCH
+    // 🔍 SEARCH
     setSearchText(state, action) {
       state.searchText = action.payload;
     },
 
-    // CATEGORY / PRODUCT
+    // 📦 CATEGORY / PRODUCT
     setSelectedCategory(state, action) {
       state.selectedCategory = action.payload;
     },
@@ -84,12 +99,17 @@ const uiSlice = createSlice({
       state.selectedProduct = action.payload;
     },
 
-    // ORDER
+    // 🧾 ORDER
     setOrderDetails(state, action) {
       state.orderDetails = action.payload;
     },
 
-    // LOGOUT
+    // 🧹 CLEAR ORDER AFTER SUCCESS
+    clearOrder(state) {
+      state.orderDetails = null;
+    },
+
+    // 🚪 LOGOUT
     logout(state) {
       state.user = null;
       state.orderDetails = null;
@@ -103,12 +123,13 @@ const uiSlice = createSlice({
     },
   },
 
-  // -----------------------
-  // EXTRA REDUCERS
-  // -----------------------
+  /* =====================================================
+     EXTRA REDUCERS
+  ===================================================== */
+
   extraReducers: (builder) => {
     builder
-      // LOGIN
+      // 🔐 LOGIN
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -122,7 +143,7 @@ const uiSlice = createSlice({
         state.error = action.payload;
       })
 
-      // SIGNUP
+      // 📝 SIGNUP
       .addCase(signupUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -137,19 +158,18 @@ const uiSlice = createSlice({
   },
 });
 
-// -----------------------
-// EXPORT ACTIONS
-// -----------------------
+/* =====================================================
+   EXPORTS
+===================================================== */
+
 export const {
   setSearchText,
   setSelectedCategory,
   setSelectedProduct,
   setOrderDetails,
+  clearOrder,
   logout,
   clearError,
 } = uiSlice.actions;
 
-// -----------------------
-// EXPORT REDUCER
-// -----------------------
 export default uiSlice.reducer;

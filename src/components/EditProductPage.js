@@ -11,7 +11,7 @@ export default function EditProductPage() {
 
   // Load existing product 
   useEffect(() => {
-    fetch("https://ajir-server.onrender.com/products/" + id)
+    fetch("https://ajir-server-v972.onrender.com/products/" + id)
       .then((res) => res.json())
       .then((data) => {
         formik.setValues({
@@ -62,7 +62,7 @@ export default function EditProductPage() {
 
   // Submit update request
   const submitUpdate = async (values, img) => {
-    const res = await fetch("https://ajir-server.onrender.com/admin/update-product/" + id, {
+    const res = await fetch("https://ajir-server-v972.onrender.com/admin/update-product/" + id, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...values, image: img }),

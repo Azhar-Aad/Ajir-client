@@ -4,7 +4,7 @@ import axios from "axios";
 import bgImage from "../images/pattern.png";
 
 // 🌍 Render backend
-const BASE_URL = "https://ajir-server.onrender.com";
+const BASE_URL = "https://ajir-server-v972.onrender.com";
 
 export default function AdminLogin() {
   const navigate = useNavigate();

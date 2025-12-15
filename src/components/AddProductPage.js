@@ -75,7 +75,7 @@ fetch("https://ajir-server.onrender.com/products")
       reader.onloadend = async () => {
         const base64Image = reader.result;
 
-        const res = await fetch("https://ajir-server.onrender.com/admin/add-product", {
+        const res = await fetch("https://ajir-server-v972.onrender.com/admin/add-product", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...values, image: base64Image }),

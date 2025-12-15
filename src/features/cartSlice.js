@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 // 🌍 Render backend URL
-const BASE_URL = "https://ajir-server.onrender.com";
+const BASE_URL = "https://ajir-server-v972.onrender.com";
 
 // -------------------------
 // LOAD FROM LOCAL STORAGE

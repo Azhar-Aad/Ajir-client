@@ -7,7 +7,7 @@ export default function CategoryProductsPage() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetch(`https://ajir-server.onrender.com/products/category/${name}`)
+    fetch(`https://ajir-server-v972.onrender.com/products/category/${name}`)
       .then((res) => res.json())
       .then((data) => setProducts(data));
   }, [name]);

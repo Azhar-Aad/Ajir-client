@@ -6,6 +6,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import moment from "moment";
 import "../index.css";
+import { Label } from "reactstrap";
 
 export default function Order() {
   const navigate = useNavigate();
@@ -150,10 +151,13 @@ export default function Order() {
 
         {/* FORM */}
         <form onSubmit={formik.handleSubmit} className="order-form">
+          <label>Full Name</label>
           <input value={formik.values.name} readOnly placeholder="Full Name" />
+          <label>Email</label>
           <input value={formik.values.email} readOnly placeholder="Email" />
 
           {/* PHONE */}
+          <label>Phone Number</label>
           <input
             type="tel"
             name="phone"
@@ -172,6 +176,7 @@ export default function Order() {
           )}
 
           {/* DATES */}
+          <label>From</label>
           <input
             type="date"
             name="from"
@@ -181,7 +186,7 @@ export default function Order() {
           {formik.errors.from && (
             <small className="input-error">{formik.errors.from}</small>
           )}
-
+          <label>To</label>
           <input
             type="date"
             name="to"
@@ -193,6 +198,7 @@ export default function Order() {
           )}
 
           {/* QUANTITY */}
+          <label>Quantity</label>
           <input
             type="number"
             name="quantity"
@@ -202,6 +208,7 @@ export default function Order() {
           />
 
           {/* DELIVERY */}
+          <label>Delivery Area</label>
           <input
             type="text"
             name="delivery"
@@ -214,6 +221,7 @@ export default function Order() {
           )}
 
           {/* ADDRESS (NUMBERS ONLY) */}
+          <label>Building Address </label>
           <input
             type="text"
             name="address"
@@ -229,7 +237,7 @@ export default function Order() {
           {formik.errors.address && (
             <small className="input-error">{formik.errors.address}</small>
           )}
-
+          <label>Note</label>
           <textarea
             name="note"
             rows="2"

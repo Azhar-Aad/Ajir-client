@@ -6,7 +6,7 @@ import { toggleWishlist } from "../features/wishlistSlice"; // ✅ FIX
 
 import { Heart } from "lucide-react";
 
-const BASE_URL = "https://ajir-server.onrender.com";
+const BASE_URL = "https://ajir-server-v972.onrender.com";
 
 export default function ProductDetailsPage() {
   const { id } = useParams();

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const BASE_URL = "https://ajir-server.onrender.com";
+const BASE_URL = "https://ajir-server-v972.onrender.com";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
